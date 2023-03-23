@@ -1,5 +1,4 @@
-//UM ARQUIVO CONTENDO UMA CLASSE DE HASH_TABLE DE TAMANHO FIXO
-
+//UM ARQUIVO CONTENDO UMA CLASSE DE HASH_TABLE 
 /*CABEÇALHO*/
 #pragma once
 #include<cmath>
@@ -32,12 +31,13 @@ hash_node<T>* table;//HASH_TABLE
 std::string *key_array;//ARRAY DE CHAVES
 
 void create(long long int);//CRIAR UMA HASH TABLE
-void set_null_value(T);//
+void set_null_value(T);//FUNÇÃO QUE DEFINE UM VALOR PADRÃO PARA ENTRADAS REMOVIDAS NA HASH TABLE
 void recalculate_index();//FUNÇÃO PARA REMOVER COLISÃO
-void insert(std::string, T);
-void remove (std::string);
-T    get(std::string);
-void show(std::string);
+void insert(std::string, T);//FUNÇÃO PARA INSERIR UM ELEMENTO NA HASH TABLE
+void remove (std::string);//FUNÇÃO QUE REMOVE UM ELEMENTO NA HASH TABLE
+void resize();//FUNÇÃO PARA REAJUSTA O TAMANHO DA HASH TABLE REALOCANDO SEUS ELEMENTOS
+T    get(std::string);//FUNÇÃO QUE RETORNA O VALOR ASSOCIADO A UMA CHAVE
+void show(std::string);//FUNÇÃO QUE EXIBE UMA ENTRADA NA HASH TABLE
 void clear();//LIMPAR  O CACHÊ DE MEMÓRIA
                  };
 
@@ -134,6 +134,40 @@ table[bucket].value=null_value;
 
                                                  };
 
+//FUNÇÃO QUE REDIMENSIONA A HASH TABLE POR UM FATOR DA ORDEM DE 10
+template<typename T>
+void hash_table<T>::resize(){
+//VARIÁVEIS LOCAIS
+long long int upper_bound, old_bucket, i/*VARIÁVEL DE ITERAÇÃO EM LOOPS*/;
+upper_bound=size;
+
+//REDIMENSIONANDO A HASH TABLE
+try{
+size=size*10;
+table =(hash_node<T>*)realloc(table, size*sizeof(hash_node<T>));
+key_array =(std::string*)realloc(key_array, size*sizeof(std::string));
+   }
+catch(std::exception& e){
+size=size/10;
+std::cout<<e.what()<<"\n";
+                   };
+
+//REALOCANDO OS ELEMENTOS DA HASH TABLE ITERANDO SOBRE O ARRAY DE CHAVES
+for(i=0; i<upper_bound; ++i){
+//ENCONTRANDO AS CHAVES INSERIDAS NA HASH_TABLE
+if(!key_array[i].empty()){
+//RECALCULANDO O NOVO VALOR DO BUCKET E REALOCANDO A ENTRADA
+old_bucket=hash_function(key_array[i])%upper_bound;//LOCALIZANDO A ANTIGA POSIÇÃO ONDE A CHAVE ESTAVA ALOCADA
+insert(key_array[i], table[old_bucket].value);//REINSERINDO A ENTRADA NA HASH TABLE
+
+//REMOVENDO A ANTIGA ENTRADA
+key_array[old_bucket].clear();
+table[old_bucket].key.clear();
+table[old_bucket].value=null_value;
+                         };
+                            };
+
+                            };
 //*****************************************************************************************************************************
 //FUNÇÃO PARA CONVERTER VARIÁVEIS DE TIPOS ALEATÓRIOS EM STRINGS (CHAVES PARA AS HASH TABLES)
 template<typename T>
